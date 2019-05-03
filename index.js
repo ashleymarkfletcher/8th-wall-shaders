@@ -1,6 +1,31 @@
 // Copyright (c) 2018 8th Wall, Inc.
 
 const fragmentShaders = [
+  `
+  precision mediump float;
+  uniform sampler2D sampler; // 0
+  uniform float vx_offset;
+  varying vec2 texUv;
+
+  vec3 heat(float v) {
+    float value = 1.0 - v;
+    return (0.5+0.5*smoothstep(0.0, 0.1, value))*vec3(
+      	smoothstep(0.5, 0.3, value),
+      	value < 0.3 ? smoothstep(0.0, 0.3, value) : smoothstep(1.0, 0.6, value),
+    	smoothstep(0.4, 0.6, value)
+	  );
+  }
+
+  void main() 
+  { 
+    // float sum = iTimeDelta;
+    float sum = 0.2;
+    // vec3 color = texture(iChannel0, texUv).rgb;
+    vec3 color = texture2D(sampler, texUv).rgb;
+    sum += smoothstep(color.z, 0.0, distance(color.xy, texUv));
+    
+    gl_FragColor = vec4(heat(sum), 1.0);   
+  }`,
   `#define C_RED vec4(1.0, 0.0, 0.0, 1.0)
    #define C_YELLOW vec4(1.0, 1.0, 0.0, 1.0)
    #define C_BLUE vec4(0.0, 0.0, 1.0, 1.0)
